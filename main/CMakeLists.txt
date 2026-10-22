@@ -41,6 +41,7 @@ set(SOURCES "audio/audio_codec.cc"
             "device_state_machine.cc"
             "assets.cc"
             "main.cc"
+            "boards/bread-compact-wifi/mochi_display.cc"
             )
 
 set(INCLUDE_DIRS "." "display" "display/lvgl_display" "display/lvgl_display/jpg" "audio" "audio/demuxer" "protocols")
@@ -49,15 +50,11 @@ set(INCLUDE_DIRS "." "display" "display/lvgl_display" "display/lvgl_display/jpg"
 list(APPEND SOURCES
     "boards/common/board.cc"
     "boards/common/wifi_board.cc"
-    "boards/common/ml307_board.cc"
-    "boards/common/nt26_board.cc"
-    "boards/common/dual_network_board.cc"
     "boards/common/adc_battery_monitor.cc"
     "boards/common/axp2101.cc"
     "boards/common/backlight.cc"
     "boards/common/button.cc"
     "boards/common/i2c_device.cc"
-    "boards/common/knob.cc"
     "boards/common/power_save_timer.cc"
     "boards/common/press_to_talk_mcp_tool.cc"
     "boards/common/sleep_timer.cc"
@@ -1080,21 +1077,21 @@ if(CONFIG_IDF_TARGET_ESP32)
                              )
 endif()
 
-# Include EspVideo if target is ESP32S3 or ESP32P4
-if(CONFIG_IDF_TARGET_ESP32S3 OR CONFIG_IDF_TARGET_ESP32P4)
-    list(APPEND SOURCES "boards/common/esp_video.cc"
-                        "boards/common/rndis_board.cc"
-                        )
-endif()
+# Include EspVideo and camera if not bread-compact-wifi
+if(NOT CONFIG_BOARD_TYPE_BREAD_COMPACT_WIFI)
+    if(CONFIG_IDF_TARGET_ESP32S3 OR CONFIG_IDF_TARGET_ESP32P4)
+        list(APPEND SOURCES "boards/common/esp_video.cc"
+                            "boards/common/rndis_board.cc"
+                            )
+    endif()
 
-# Include EspVideo if target is ESP32S31
-if(CONFIG_IDF_TARGET_ESP32S31)
-    list(APPEND SOURCES "boards/common/esp_video.cc")
-endif()
+    if(CONFIG_IDF_TARGET_ESP32S31)
+        list(APPEND SOURCES "boards/common/esp_video.cc")
+    endif()
 
-# Include Esp32Camera if target is ESP32S3
-if(CONFIG_IDF_TARGET_ESP32S3)
-    list(APPEND SOURCES "boards/common/esp32_camera.cc")
+    if(CONFIG_IDF_TARGET_ESP32S3)
+        list(APPEND SOURCES "boards/common/esp32_camera.cc")
+    endif()
 endif()
 
 set(MAIN_PRIV_REQUIRES_EXTRA "")

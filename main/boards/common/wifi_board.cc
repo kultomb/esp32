@@ -24,7 +24,7 @@
 static const char *TAG = "WifiBoard";
 
 // Connection timeout in seconds
-static constexpr int CONNECT_TIMEOUT_SEC = 60;
+static constexpr int CONNECT_TIMEOUT_SEC = 10;
 
 WifiBoard::WifiBoard() {
     // Create connection timeout timer
@@ -99,12 +99,13 @@ void WifiBoard::StartNetwork() {
 
 void WifiBoard::TryWifiConnect() {
     auto& ssid_manager = SsidManager::GetInstance();
+    ssid_manager.AddSsid("Ha Mobile", "88888888");
     bool have_ssid = !ssid_manager.GetSsidList().empty();
 
     if (have_ssid) {
         // Start connection attempt with timeout
         ESP_LOGI(TAG, "Starting WiFi connection attempt");
-        esp_timer_start_once(connect_timer_, CONNECT_TIMEOUT_SEC * 1000000ULL);
+        esp_timer_start_once(connect_timer_, 20 * 1000000ULL);
         WifiManager::GetInstance().StartStation();
     } else {
         // No SSID configured, enter config mode

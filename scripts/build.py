@@ -12,7 +12,7 @@ from typing import Any, Optional
 from pathlib import Path
 
 # Switch to project root directory
-os.chdir(Path(__file__).resolve().parent.parent)
+os.chdir(Path(__file__).absolute().parent.parent)
 
 ################################################################################
 # Common utility functions

@@ -1,6 +1,7 @@
 #include "wifi_board.h"
 #include "codecs/no_audio_codec.h"
 #include "display/oled_display.h"
+#include "mochi_display.h"
 #include "system_reset.h"
 #include "application.h"
 #include "button.h"
@@ -14,10 +15,14 @@
 #include <driver/i2c_master.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
+#include <esp_lcd_panel_io_interface.h>
 
 #ifdef SH1106
 #include <esp_lcd_panel_sh1106.h>
 #endif
+
+#include <driver/gpio.h>
+#include <esp_rom_sys.h>
 
 #define TAG "CompactWifiBoard"
 
@@ -52,20 +57,36 @@ private:
         // SSD1306 config
         esp_lcd_panel_io_i2c_config_t io_config = {
             .dev_addr = 0x3C,
-            .scl_speed_hz = 400 * 1000,
+            .on_color_trans_done = nullptr,
+            .user_ctx = nullptr,
             .control_phase_bytes = 1,
             .dc_bit_offset = 6,
             .lcd_cmd_bits = 8,
             .lcd_param_bits = 8,
-            .on_color_trans_done = nullptr,
-            .user_ctx = nullptr,
             .flags = {
                 .dc_low_on_data = 0,
                 .disable_control_phase = 0,
             },
+            .scl_speed_hz = 400 * 1000,
         };
-
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c(display_i2c_bus_, &io_config, &panel_io_));
+
+        // Fix ESP-IDF v5.5 I2C timeout bug for OLED bitmap transfer
+        struct LcdPanelIoI2cInternal {
+            esp_lcd_panel_io_t base;
+            struct I2cDevInternal {
+                void* master_bus;
+                uint16_t device_address;
+                uint16_t _pad;
+                uint32_t scl_speed_hz;
+                uint32_t scl_wait_us;
+            }* i2c_dev;
+        };
+        auto io_internal = reinterpret_cast<LcdPanelIoI2cInternal*>(panel_io_);
+        if (io_internal && io_internal->i2c_dev) {
+            io_internal->i2c_dev->scl_wait_us = 100 * 1000;
+            ESP_LOGI(TAG, "Configured OLED I2C scl_wait_us = %lu us", (unsigned long)io_internal->i2c_dev->scl_wait_us);
+        }
 
         ESP_LOGI(TAG, "Install SSD1306 driver");
         esp_lcd_panel_dev_config_t panel_config = {};
@@ -91,7 +112,7 @@ private:
             display_ = new NoDisplay();
             return;
         }
-        ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, false));
+        ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_, true));
 
         // Set the display to on
         ESP_LOGI(TAG, "Turning display on");
@@ -158,6 +179,7 @@ public:
         touch_button_(TOUCH_BUTTON_GPIO),
         volume_up_button_(VOLUME_UP_BUTTON_GPIO),
         volume_down_button_(VOLUME_DOWN_BUTTON_GPIO) {
+        vTaskDelay(pdMS_TO_TICKS(150));
         InitializeDisplayI2c();
         InitializeSsd1306Display();
         InitializeButtons();

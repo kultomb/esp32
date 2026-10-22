@@ -20,6 +20,10 @@ private:
     lv_obj_t* side_bar_ = nullptr;
     lv_obj_t* emotion_label_ = nullptr;
     lv_obj_t* chat_message_label_ = nullptr;
+    lv_obj_t* left_eye_ = nullptr;
+    lv_obj_t* right_eye_ = nullptr;
+    lv_obj_t* left_pupil_ = nullptr;
+    lv_obj_t* right_pupil_ = nullptr;
 
     virtual bool Lock(int timeout_ms = 0) override;
     virtual void Unlock() override;
@@ -35,6 +39,10 @@ public:
     virtual void SetupUI() override;
     virtual void SetChatMessage(const char* role, const char* content) override;
     virtual void RemoveChatMessage(const char* role, const char* content) override;
+    virtual void SetStatus(const char* status) override;
+    virtual void ShowNotification(const char* notification, int duration_ms = 3000) override {}
+    virtual void ShowNotification(const std::string& notification, int duration_ms = 3000) override {}
+    virtual void UpdateStatusBar(bool update_all = false) override {}
     virtual bool SetEmotion(const char* emotion) override;
     virtual void SetTheme(Theme* theme) override;
     virtual bool IsMonochrome() const override { return true; }
