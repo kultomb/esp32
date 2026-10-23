@@ -20,6 +20,7 @@
 #ifdef CONFIG_USE_ESP_BLUFI_WIFI_PROVISIONING
 #include "blufi.h"
 #endif
+#include <esp_wifi.h>
 
 static const char *TAG = "WifiBoard";
 
@@ -126,6 +127,8 @@ void WifiBoard::OnNetworkEvent(NetworkEvent event, const std::string& data) {
 #endif
             in_config_mode_ = false;
             ESP_LOGI(TAG, "Connected to WiFi: %s", data.c_str());
+            esp_wifi_set_ps(WIFI_PS_NONE);
+            ESP_LOGI(TAG, "Disabled WiFi power save (WIFI_PS_NONE) for stutter-free audio streaming");
             break;
         case NetworkEvent::Scanning:
             ESP_LOGI(TAG, "WiFi scanning");
