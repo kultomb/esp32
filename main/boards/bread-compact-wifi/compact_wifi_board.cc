@@ -2,6 +2,7 @@
 #include "codecs/no_audio_codec.h"
 #include "display/oled_display.h"
 #include "mochi_display.h"
+#include "emo_display.h"
 #include "system_reset.h"
 #include "application.h"
 #include "button.h"
@@ -118,7 +119,9 @@ private:
         ESP_LOGI(TAG, "Turning display on");
         ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_, true));
 
-        display_ = new MochiDisplay(panel_io_, panel_, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
+        // Khởi tạo EMO Display (2 mắt to, chuyển động nhấp nhô nhẹ, không miệng).
+        // Nếu muốn chuyển lại Mochi Display (có miệng), đổi EmoDisplay thành MochiDisplay:
+        display_ = new EmoDisplay(panel_io_, panel_, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
     }
 
     void InitializeButtons() {
