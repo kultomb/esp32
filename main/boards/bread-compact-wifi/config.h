@@ -52,6 +52,14 @@
 #define DISPLAY_MIRROR_X true
 #define DISPLAY_MIRROR_Y true
 
+// =====================================================================
+// CẤU HÌNH GIAO DIỆN BIỂU CẢM (DISPLAY / EMOTION THEME)
+// 1: EMO Robot (2 mắt to, bồng bềnh, nghiêng mắt khi nghe, không miệng)
+// 2: Mochi Robot (Bộ 19 biểu cảm chi tiết + miệng uốn lượn lò xo)
+// =====================================================================
+#define DISPLAY_STYLE_EMO    1
+#define DISPLAY_STYLE_MOCHI  2
+#define CURRENT_DISPLAY_STYLE DISPLAY_STYLE_EMO
 
 // A MCP Test: Control a lamp
 #define LAMP_GPIO GPIO_NUM_18

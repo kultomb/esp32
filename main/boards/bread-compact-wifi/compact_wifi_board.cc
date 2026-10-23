@@ -119,9 +119,13 @@ private:
         ESP_LOGI(TAG, "Turning display on");
         ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_, true));
 
-        // Khởi tạo EMO Display (2 mắt to, chuyển động nhấp nhô nhẹ, không miệng).
-        // Nếu muốn chuyển lại Mochi Display (có miệng), đổi EmoDisplay thành MochiDisplay:
+#if CURRENT_DISPLAY_STYLE == DISPLAY_STYLE_MOCHI
+        ESP_LOGI(TAG, "Using MochiDisplay (19 emotions + curved talking mouth)");
+        display_ = new MochiDisplay(panel_io_, panel_, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
+#else
+        ESP_LOGI(TAG, "Using EmoDisplay (EMO robot large floating eyes)");
         display_ = new EmoDisplay(panel_io_, panel_, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
+#endif
     }
 
     void InitializeButtons() {
