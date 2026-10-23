@@ -59,7 +59,7 @@
 // =====================================================================
 #define DISPLAY_STYLE_EMO    1
 #define DISPLAY_STYLE_MOCHI  2
-#define CURRENT_DISPLAY_STYLE DISPLAY_STYLE_EMO
+#define CURRENT_DISPLAY_STYLE DISPLAY_STYLE_MOCHI
 
 // A MCP Test: Control a lamp
 #define LAMP_GPIO GPIO_NUM_18
