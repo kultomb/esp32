@@ -343,17 +343,24 @@ class XiaozhiToolApp:
                 merge_cmd = f'"{ESP_PYTHON}" -m esptool --chip esp32s3 merge_bin -o "{dest_all}" --flash_mode dio --flash_size 4MB --flash_freq 80m 0x0 "{BUILD_DIR}\\bootloader\\bootloader.bin" 0x8000 "{BUILD_DIR}\\partition_table\\partition-table.bin" 0xd000 "{BUILD_DIR}\\ota_data_initial.bin" 0x10000 "{BUILD_DIR}\\xiaozhi.bin" 0x300000 "{BUILD_DIR}\\generated_assets.bin"'
                 subprocess.run(merge_cmd, shell=True, cwd=PROJECT_DIR)
                 
+                # Lưu riêng file bin theo từng theme
+                theme_val = self.theme_combo.get()
+                style_name = "mochi" if "Mochi" in theme_val else "emo"
+                theme_bin_path = os.path.join(dest_folder, f"xiaozhi_custom_s3mini_{style_name}.bin")
+
                 # Copy sang folder my_custom_firmware và firmware
                 try:
                     import shutil
                     shutil.copy(f"{BUILD_DIR}\\xiaozhi.bin", f"{dest_folder}\\xiaozhi.bin")
                     shutil.copy(dest_all, f"{dest_folder}\\xiaozhi_custom_s3mini_all_in_one.bin")
+                    shutil.copy(dest_all, theme_bin_path)
                     shutil.copy(f"{BUILD_DIR}\\xiaozhi.bin", rf"{PROJECT_DIR}\firmware\xiaozhi.bin")
                     shutil.copy(dest_all, rf"{PROJECT_DIR}\firmware\xiaozhi_custom_s3mini_all_in_one.bin")
+                    shutil.copy(dest_all, rf"{PROJECT_DIR}\firmware\xiaozhi_custom_s3mini_{style_name}.bin")
                 except:
                     pass
 
-                self.log("✅ BUILD THÀNH CÔNG! File đã sẵn sàng.")
+                self.log(f"✅ BUILD THÀNH CÔNG! Đã cập nhật bản {style_name.upper()}.")
 
             if mode in ("flash", "both"):
                 port = self.port_combo.get()
@@ -367,8 +374,19 @@ class XiaozhiToolApp:
                 self.log(f"⚡ Đang nạp firmware vào {port}...")
                 self.log("==========================================")
 
-                # Nạp trọn gói All-in-one tại 0x0
-                flash_bin = r"c:\Users\CMD\Desktop\esp32 super mini xiaozhi\xiaozhi_custom_s3mini_all_in_one.bin"
+                # Tự động nạp đúng file bin của theme đã chọn (nếu có sẵn)
+                dest_folder = r"c:\Users\CMD\Desktop\esp32 super mini xiaozhi\my_custom_firmware"
+                theme_val = self.theme_combo.get()
+                style_name = "mochi" if "Mochi" in theme_val else "emo"
+                theme_bin = os.path.join(dest_folder, f"xiaozhi_custom_s3mini_{style_name}.bin")
+
+                if os.path.exists(theme_bin):
+                    flash_bin = theme_bin
+                    self.log(f"🎯 Sử dụng firmware tương ứng: xiaozhi_custom_s3mini_{style_name}.bin")
+                else:
+                    flash_bin = r"c:\Users\CMD\Desktop\esp32 super mini xiaozhi\xiaozhi_custom_s3mini_all_in_one.bin"
+                    self.log("⚠️ Chưa có bản build riêng cho theme này, dùng bản all-in-one hiện tại. Khuyên dùng nút 'Build & Nạp Luôn'!")
+
                 flash_cmd = f'"{ESP_PYTHON}" -m esptool --port {port} --chip esp32s3 -b 921600 write_flash 0x0 "{flash_bin}"'
                 p = subprocess.Popen(flash_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, cwd=PROJECT_DIR)
                 for line in iter(p.stdout.readline, ''):
